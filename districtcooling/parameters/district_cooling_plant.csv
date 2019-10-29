@@ -1,0 +1,18 @@
+PROPERTY,VALUE
+pump efficiency chillers pump [-],0.75
+head chillers pump [m],10
+evaporation temperature [Celsius],3
+COP efficiency [-],0.79
+chiller-set cooling capacity [W],200000000
+pump efficiency TES pump [-],0.75
+head TES pump [m],10
+TES energy capacity [J],20000000000
+TES initial charge ratio [-],0.5
+TES terminal charge ratio [-],0.5
+pump efficiency condenser pump [-],0.75
+head condenser pump [m],10
+ventilation factor cooling towers [J/J],0.03
+
+
+
+

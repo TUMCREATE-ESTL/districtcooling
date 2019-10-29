@@ -1,0 +1,21 @@
+INFO:
+District cooling package with simple cubic building model implemented
+
+CREATION:
+15/10/2019
+
+LAST EDIT:
+15/10/2019
+
+EXTERNAL PACKAGES UTILIZED:
+- pyomo
+- pandas
+- numpy
+- networkx
+- matplotlib
+
+PYTHON VERSION:
+Python 3.6 (Anaconda)
+
+AUTHOR:
+Mischa Grussmann

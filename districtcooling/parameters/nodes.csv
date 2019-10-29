@@ -1,0 +1,5 @@
+ID,Type,position-X,position-Y
+0,reference,1,0.5
+1,junction,1,2
+2,building,0,2.5
+3,building,2,2.5
