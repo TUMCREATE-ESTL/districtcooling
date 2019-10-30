@@ -1,5 +1,6 @@
-import pyomo.environ as py
+import os
 import pandas as pd
+import pyomo.environ as py
 
 # ======================================================================================================================
 # Linear optimization of district cooling system's load-curve CLASS
@@ -606,7 +607,12 @@ class LinearOptimizer:
         solution_frame.index.names = ['VARIABLES', 'IDs']
 
         if save:
-            solution_frame.to_csv('results/csv_files/'+str(index_for_saving)+'_solved_problem.csv')
+            solution_frame.to_csv(
+                os.path.join(
+                    os.path.dirname(os.path.normpath(__file__)),
+                    '..', 'results', 'csv_files', str(index_for_saving) + '_solved_problem.csv'
+                )
+            )
 
         return solution_frame
 

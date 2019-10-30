@@ -1,3 +1,4 @@
+import os
 import pandas as pd
 
 # ======================================================================================================================
@@ -14,37 +15,37 @@ class ParametersReader:
 
         # Parameters of distribution system
         self.lines = pd.read_csv(
-            "data/lines.csv",
+            os.path.join(os.path.dirname(os.path.normpath(__file__)), '..', 'data', 'lines.csv'),
             index_col=0
         )
         self.nodes = pd.read_csv(
-            "data/nodes.csv",
+            os.path.join(os.path.dirname(os.path.normpath(__file__)), '..', 'data', 'nodes.csv'),
             index_col=0
         )
         self.distribution_system = pd.read_csv(
-            "data/distribution_system.csv",
+            os.path.join(os.path.dirname(os.path.normpath(__file__)), '..', 'data', 'distribution_system.csv'),
             index_col=0,
             squeeze=True
         )
         # Parameters of buildings
         self.buildings = pd.read_csv(
-            "data/buildings.csv",
+            os.path.join(os.path.dirname(os.path.normpath(__file__)), '..', 'data', 'buildings.csv'),
             index_col=0
         )
         # Parameters of district cooling plant
         self.cooling_plant = pd.read_csv(
-            "data/district_cooling_plant.csv",
+            os.path.join(os.path.dirname(os.path.normpath(__file__)), '..', 'data', 'district_cooling_plant.csv'),
             index_col=0,
             squeeze=True
         )
         # Parameters of environment
         self.environment = pd.read_csv(
-            "data/environment.csv",
+            os.path.join(os.path.dirname(os.path.normpath(__file__)), '..', 'data', 'environment.csv'),
             index_col=0
         )
         # Parameters of physical properties
         self.physics = pd.read_csv(
-            "data/physical_properties.csv",
+            os.path.join(os.path.dirname(os.path.normpath(__file__)), '..', 'data', 'physical_properties.csv'),
             index_col=0,
             squeeze=True
         )

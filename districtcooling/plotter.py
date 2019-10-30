@@ -1,5 +1,6 @@
 import matplotlib.pyplot as plt
 import networkx as nx
+import os
 
 # ======================================================================================================================
 # Tool-kit for visualization and plotting CLASS
@@ -118,6 +119,11 @@ class Plotter:
         # -------------------- Plot and save
         plt.axis("off")
         if save:
-            plt.savefig("results/graph_plots/" + str(index_for_saving) + "_graph.png")
+            plt.savefig(
+                os.path.join(
+                    os.path.dirname(os.path.normpath(__file__)),
+                    '..', 'results', 'graph_plots', str(index_for_saving) + '_graph.png'
+                )
+            )
 
         plt.show()
