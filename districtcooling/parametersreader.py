@@ -14,37 +14,37 @@ class ParametersReader:
 
         # Parameters of distribution system
         self.lines = pd.read_csv(
-            "districtcooling/parameters/lines.csv",
+            "data/lines.csv",
             index_col=0
         )
         self.nodes = pd.read_csv(
-            "districtcooling/parameters/nodes.csv",
+            "data/nodes.csv",
             index_col=0
         )
         self.distribution_system = pd.read_csv(
-            "districtcooling/parameters/distribution_system.csv",
+            "data/distribution_system.csv",
             index_col=0,
             squeeze=True
         )
         # Parameters of buildings
         self.buildings = pd.read_csv(
-            "districtcooling/parameters/buildings.csv",
+            "data/buildings.csv",
             index_col=0
         )
         # Parameters of district cooling plant
         self.cooling_plant = pd.read_csv(
-            "districtcooling/parameters/district_cooling_plant.csv",
+            "data/district_cooling_plant.csv",
             index_col=0,
             squeeze=True
         )
         # Parameters of environment
         self.environment = pd.read_csv(
-            "districtcooling/parameters/environment.csv",
+            "data/environment.csv",
             index_col=0
         )
         # Parameters of physical properties
         self.physics = pd.read_csv(
-            "districtcooling/parameters/physical_properties.csv",
+            "data/physical_properties.csv",
             index_col=0,
             squeeze=True
         )

@@ -606,7 +606,7 @@ class LinearOptimizer:
         solution_frame.index.names = ['VARIABLES', 'IDs']
 
         if save:
-            solution_frame.to_csv('districtcooling/results/csv_files/'+str(index_for_saving)+'_solved_problem.csv')
+            solution_frame.to_csv('results/csv_files/'+str(index_for_saving)+'_solved_problem.csv')
 
         return solution_frame
 

@@ -118,6 +118,6 @@ class Plotter:
         # -------------------- Plot and save
         plt.axis("off")
         if save:
-            plt.savefig("districtcooling/results/graph_plots/" + str(index_for_saving) + "_graph.png")
+            plt.savefig("results/graph_plots/" + str(index_for_saving) + "_graph.png")
 
         plt.show()

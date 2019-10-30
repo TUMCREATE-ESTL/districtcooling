@@ -14,3 +14,11 @@
 *.sqlite
 
 *.DS_Store
+
+/results/csv_files/*
+
+/results/graph_plots/*
+
+!/results/csv_files/README.md
+
+!/results/graph_plots/README.md
