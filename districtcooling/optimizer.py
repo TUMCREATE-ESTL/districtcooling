@@ -306,68 +306,201 @@ class LinearOptimizer:
             rule=buildings_flow_and_heat_rule
         )
 
-        # CONSTRAINT 8: Temperature boundaries of buildings
-        """ 1. Building temperatures are introduced as pseudo-variables """
-        problem.buildings_temperature = py.Var(
+        # # CONSTRAINT 8: Temperature boundaries of buildings
+        # """ 1. Building temperatures are introduced as pseudo-variables """
+        # problem.buildings_temperature = py.Var(
+        #     problem.time_set,
+        #     problem.building_ids,
+        #     domain=py.NonNegativeReals
+        # )
+        # """ 2. Building temperatures are limited by lower and upper boundaries, as defined in simple_buildings.csv """
+        # def buildings_temperature_boundaries_rule(
+        #         problem,
+        #         time_step,
+        #         building_id
+        # ):
+        #     rule = (
+        #         self.parameters.buildings["Temperature MIN [Celsius]"][building_id],
+        #         problem.buildings_temperature[time_step, building_id],
+        #         self.parameters.buildings["Temperature MAX [Celsius]"][building_id]
+        #     )
+        #     return rule
+        #
+        # problem.buildings_temperature_boundaries_constraint = py.Constraint(
+        #     problem.time_set,
+        #     problem.building_ids,
+        #     rule=buildings_temperature_boundaries_rule
+        # )
+
+        # # CONSTRAINT 9: Terminal temperatures in buildings have to equal initial temperatures
+        # def buildings_temperature_terminal_rule(
+        #         problem,
+        #         building_id
+        # ):
+        #     rule = (
+        #         problem.buildings_temperature[problem.time_set[-1], building_id]
+        #         == self.parameters.buildings["Initial Temperature [Celsius]"][building_id]
+        #     )
+        #     return rule
+        # problem.buildings_temperature_terminal_constraint = py.Constraint(
+        #     problem.building_ids,
+        #     rule=buildings_temperature_terminal_rule
+        # )
+
+        # # CONSTRAINT 10: Temperatures in buildings are linked with heat flows taken-in from buildings (=cooling)
+        # def buildings_temperature_and_flow_rule(
+        #         problem,
+        #         time_step,
+        #         building_id
+        # ):
+        #     rule = (
+        #         problem.buildings_temperature[time_step, building_id]
+        #         == self.modelled_buildings_dict[building_id].get_building_temperature(
+        #             time_step,
+        #             building_id,
+        #             problem.buildings_heat_inflow  # 2-dimensional, time and building-number!
+        #         )
+        #     )
+        #     return rule
+        #
+        # problem.buildings_temperature_and_flow_constraint = py.Constraint(
+        #     problem.time_set,
+        #     problem.building_ids,
+        #     rule=buildings_temperature_and_flow_rule
+        # )
+
+        # CONSTRAINT 8.1: Buildings' initial state constraint
+        """ 1. State vector timeseries is instantiated as variable"""
+        problem.variable_state_timeseries = py.Var(
             problem.time_set,
-            problem.building_ids,
+            [
+                (building_id, state)
+                for building_id, building in self.modelled_buildings_dict.items()
+                for state in building.set_states
+            ],
+            domain=py.Reals
+        )
+
+        """ 2. Initial state vector is defined"""
+        problem.building_initial_state_constraints = py.ConstraintList()
+        for building_id, building in self.modelled_buildings_dict.items():
+            for state in building.set_states:
+                problem.building_initial_state_constraints.add(
+                    problem.variable_state_timeseries[problem.time_set[1], (building_id, state)]
+                    ==
+                    building.set_state_initial[state]
+                )
+
+        # CONSTRAINT 8.2: Buildings' state equation constraint
+        """ 1. Control vector timeseries is instantiated as variable"""
+        problem.variable_control_timeseries = py.Var(
+            problem.time_set,
+            [
+                (building_id, control)
+                for building_id, building in self.modelled_buildings_dict.items()
+                for control in building.set_controls
+            ],
             domain=py.NonNegativeReals
         )
-        """ 2. Building temperatures are limited by lower and upper boundaries, as defined in buildings.csv """
-        def buildings_temperature_boundaries_rule(
-                problem,
-                time_step,
-                building_id
-        ):
-            rule = (
-                self.parameters.buildings["Temperature MIN [Celsius]"][building_id],
-                problem.buildings_temperature[time_step, building_id],
-                self.parameters.buildings["Temperature MAX [Celsius]"][building_id]
-            )
-            return rule
+        """ 2. State equation is defined"""
+        problem.building_state_equation_constraints = py.ConstraintList()
+        for building_id, building in self.modelled_buildings_dict.items():
+            for state in building.set_states:
+                for timestep in problem.time_set:
+                    if timestep != problem.time_set[-1]:
+                        problem.building_state_equation_constraints.add(
+                            problem.variable_state_timeseries[timestep + 1, (building_id, state)]
+                            ==
+                            (
+                                py.quicksum(
+                                    building.state_matrix.loc[state, state_other]
+                                    * problem.variable_state_timeseries[timestep, (building_id, state_other)]
+                                    for state_other in building.set_states
+                                )
+                                + py.quicksum(
+                                    building.control_matrix.loc[state, control]
+                                    * problem.variable_control_timeseries[timestep, (building_id, control)]
+                                    for control in building.set_controls
+                                )
+                                + py.quicksum(
+                                    building.disturbance_matrix.loc[state, disturbance]
+                                    * building.disturbance_timeseries.loc[building.set_timesteps[timestep - 1], disturbance]
+                                    for disturbance in building.set_disturbances
+                                )
+                            )
+                        )
 
-        problem.buildings_temperature_boundaries_constraint = py.Constraint(
+        # CONSTRAINT 9.1: Buildings' output equation constraint
+        """ 1. Output vector timeseries is instantiated as variable"""
+        problem.variable_output_timeseries = py.Var(
             problem.time_set,
-            problem.building_ids,
-            rule=buildings_temperature_boundaries_rule
+            [
+                (building_id, output)
+                for building_id, building in self.modelled_buildings_dict.items()
+                for output in building.set_outputs
+            ],
+            domain=py.Reals
         )
+        """ 2. Output equation is defined"""
+        problem.building_output_equation_constraints = py.ConstraintList()
+        for building_id, building in self.modelled_buildings_dict.items():
+            for output in building.set_outputs:
+                for timestep in problem.time_set:
+                    problem.building_output_equation_constraints.add(
+                        problem.variable_output_timeseries[timestep, (building_id, output)]
+                        ==
+                        (
+                            py.quicksum(
+                                building.state_output_matrix.loc[output, state]
+                                * problem.variable_state_timeseries[timestep, (building_id, state)]
+                                for state in building.set_states
+                            )
+                            + py.quicksum(
+                                building.control_output_matrix.loc[output, control]
+                                * problem.variable_control_timeseries[timestep, (building_id, control)]
+                                for control in building.set_controls
+                            )
+                            + py.quicksum(
+                                building.disturbance_output_matrix.loc[output, disturbance]
+                                * building.disturbance_timeseries.loc[building.set_timesteps[timestep - 1], disturbance]
+                                for disturbance in building.set_disturbances
+                            )
+                        )
+                    )
 
-        # CONSTRAINT 9: Terminal temperatures in buildings have to equal initial temperatures
-        def buildings_temperature_terminal_rule(
-                problem,
-                building_id
-        ):
-            rule = (
-                problem.buildings_temperature[problem.time_set[-1], building_id]
-                == self.parameters.buildings["Initial Temperature [Celsius]"][building_id]
-            )
-            return rule
-        problem.buildings_temperature_terminal_constraint = py.Constraint(
-            problem.building_ids,
-            rule=buildings_temperature_terminal_rule
-        )
+        # CONSTRAINT 9.2: Output vector minimum / maximum constraint
+        """ 1. Minimum / maximum constraints are defined"""
+        problem.building_output_bounds_constraints = py.ConstraintList()
+        for building_id, building in self.modelled_buildings_dict.items():
+            for output in building.set_outputs:
+                for timestep in problem.time_set:
+                    # Minimum.
+                    problem.building_output_bounds_constraints.add(
+                        problem.variable_output_timeseries[timestep, (building_id, output)]
+                        >=
+                        building.output_constraint_timeseries_minimum.loc[building.set_timesteps[timestep - 1], output]
+                    )
+                    # Maximum.
+                    problem.building_output_bounds_constraints.add(
+                        problem.variable_output_timeseries[timestep, (building_id, output)]
+                        <=
+                        building.output_constraint_timeseries_maximum.loc[building.set_timesteps[timestep - 1], output]
+                    )
 
-        # CONSTRAINT 10: Temperatures in buildings are linked with heat flows taken-in from buildings (=cooling)
-        def buildings_temperature_and_flow_rule(
-                problem,
-                time_step,
-                building_id
-        ):
-            rule = (
-                problem.buildings_temperature[time_step, building_id]
-                == self.modelled_buildings_dict[building_id].get_building_temperature(
-                    time_step,
-                    building_id,
-                    problem.buildings_heat_inflow  # 2-dimensional, time and building-number!
+        # CONSTRAINT 10: Connect building to grid
+        """ 1. Building heat flow from grid constraint is defined"""
+        problem.building_grid_constraints = py.ConstraintList()
+        for building_id, building in self.modelled_buildings_dict.items():
+            for timestep in problem.time_set:
+                problem.building_grid_constraints.add(
+                    problem.buildings_heat_inflow[timestep, building_id]
+                    ==
+                    py.quicksum(
+                        (1.0 * problem.variable_output_timeseries[timestep, (building_id, output)])
+                        if 'electric_power' in output else 0.0  # TODO: Define output for thermal power in CoBMo
+                        for output in building.set_outputs
+                    )
                 )
-            )
-            return rule
-
-        problem.buildings_temperature_and_flow_constraint = py.Constraint(
-            problem.time_set,
-            problem.building_ids,
-            rule=buildings_temperature_and_flow_rule
-        )
 
         # CONSTRAINT 11: District cooling plant's total electric power consumption is related to chillers flow and
         # storage flow variables
@@ -565,15 +698,15 @@ class LinearOptimizer:
             data=buildings_heat_inflow_dict,
             index=[building_id for building_id in problem.building_ids]
         )
-        buildings_temperature_dict = {
-            time_step: [
-                problem.buildings_temperature[time_step, building_id]() for building_id in problem.building_ids
-            ] for time_step in problem.time_set
-        }
-        buildings_temperature_frame = pd.DataFrame(
-            data=buildings_temperature_dict,
-            index=[building_id for building_id in problem.building_ids]
-        )
+        # buildings_temperature_dict = {
+        #     time_step: [
+        #         problem.buildings_temperature[time_step, building_id]() for building_id in problem.building_ids
+        #     ] for time_step in problem.time_set
+        # }
+        # buildings_temperature_frame = pd.DataFrame(
+        #     data=buildings_temperature_dict,
+        #     index=[building_id for building_id in problem.building_ids]
+        # )
         solution_frame = pd.concat(
             [
                 dcp_power_frame,
@@ -587,7 +720,7 @@ class LinearOptimizer:
                 lines_flow_frame,
                 lines_velocity_frame,
                 buildings_heat_inflow_frame,
-                buildings_temperature_frame
+                # buildings_temperature_frame
              ],
             keys=[
                 'DCP power [W]',
@@ -601,7 +734,7 @@ class LinearOptimizer:
                 'Lines flow [qbm/s]',
                 'Lines velocity [m/s]',
                 'Heat-inflow buildings [W]',
-                'Building temperature [C]'
+                # 'Building temperature [C]'
             ]
         )
         solution_frame.index.names = ['VARIABLES', 'IDs']

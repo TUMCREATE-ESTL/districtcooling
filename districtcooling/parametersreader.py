@@ -28,6 +28,10 @@ class ParametersReader:
             squeeze=True
         )
         # Parameters of buildings
+        # self.buildings = pd.read_csv(
+        #     os.path.join(os.path.dirname(os.path.normpath(__file__)), '..', 'data', 'simple_buildings.csv'),
+        #     index_col=0
+        # )
         self.buildings = pd.read_csv(
             os.path.join(os.path.dirname(os.path.normpath(__file__)), '..', 'data', 'buildings.csv'),
             index_col=0

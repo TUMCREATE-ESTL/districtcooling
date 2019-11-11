@@ -1,3 +1,5 @@
+import cobmo.building
+import cobmo.database_interface
 import districtcooling as dc
 
 # Generate objects =====================================================================================================
@@ -6,12 +8,19 @@ parameters = dc.ParametersReader()
 grid = dc.CoolingGrid(parameters=parameters)
 plant = dc.CoolingPlant(parameters=parameters)
 plotter = dc.Plotter(parameters=parameters)
+# buildings_dict = {
+#     building_id: dc.CubicBuilding(
+#         building_id=building_id,
+#         parameters=parameters
+#     )
+#     for building_id in parameters.buildings.index
+# }
 buildings_dict = {
-    building_id: dc.CubicBuilding(
-        building_id=building_id,
-        parameters=parameters
+    building_id: cobmo.building.Building(
+        conn=cobmo.database_interface.connect_database(),
+        scenario_name=building['building_scenario_name']
     )
-    for building_id in parameters.buildings.index
+    for building_id, building in parameters.buildings.iterrows()
 }
 optimizer = dc.LinearOptimizer(
     parameters=parameters,
