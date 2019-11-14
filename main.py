@@ -1,3 +1,5 @@
+import numpy as np
+
 import cobmo.building
 import cobmo.database_interface
 import districtcooling as dc
@@ -32,7 +34,7 @@ optimizer = dc.LinearOptimizer(
 # Test objects =========================================================================================================
 
 # Non-linear simulation of the distribution system (DS) ----------------------------------------------------------------
-ets_flow_time_array = grid.build_ets_flow_time_array([0.3, 0.6])
+ets_flow_time_array = grid.build_ets_flow_time_array(np.ones(parameters.buildings.shape[0]))
 grid_simulation = grid.get_grid_simulation(ets_flow_time_array)
 
 print(grid_simulation)
