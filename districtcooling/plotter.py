@@ -1,3 +1,4 @@
+import geopandas
 import matplotlib.pyplot as plt
 import networkx as nx
 import os
@@ -33,6 +34,13 @@ class Plotter:
                 self.parameters.nodes['position-Y'][node]
             ) for node in list_nodes
         }
+
+        building_polygons = (
+            geopandas.read_file(
+                os.path.join(os.path.dirname(os.path.normpath(__file__)), '..', 'data', 'building_polygons.shp')
+            )
+        )
+        building_polygons.plot(color='lightgrey')
 
         nx.draw_networkx_nodes(
             graph,
