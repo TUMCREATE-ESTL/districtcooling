@@ -497,7 +497,7 @@ class LinearOptimizer:
                     ==
                     py.quicksum(
                         (1.0 * problem.variable_output_timeseries[timestep, (building_id, output)])
-                        if 'electric_power' in output else 0.0  # TODO: Define output for thermal power in CoBMo
+                        if 'thermal_power_cooling' in output else 0.0
                         for output in building.set_outputs
                     )
                 )
