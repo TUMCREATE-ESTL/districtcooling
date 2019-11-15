@@ -51,9 +51,9 @@ plotter.plot_grid_simulation(
     save=True,
     index_for_saving=1
 )
-"""
+
 # Linear simulation of the district cooling plant (DCP) ----------------------------------------------------------------
-"""
+
 plant_simulation = plant.get_plant_simulation(
     chiller_set_flow=0.2,
     tes_flow=0.1,

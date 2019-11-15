@@ -457,3 +457,24 @@ class CoolingGrid:
             * ets_flow
         )
         return heat_flow_from_building
+
+    # Methods for planning ---------------------------------------------------------------------------------------------
+
+    def get_diameters_from_flow(
+        self,
+        line_flows,
+        u_max
+    ):
+        diameters_dict = {
+            'Diameters': [
+                (
+                    (4 / np.pi)
+                    * (line_flows[line] / u_max)
+                ) ^ 0.5
+            ] for line in line_flows.index
+        }
+        diameters_df = pd.DataFrame(
+            data=diameters_dict,
+            index=[line for line in line_flows.index]
+        )
+        return diameters_df
