@@ -452,11 +452,8 @@ class CoolingGrid:
         ets_flow
     ):
         heat_flow_from_building = (
-            ets_flow
-            * self.parameters.physics["water density [kg/m^3]"]
-            * (
-                self.parameters.physics["specific enthalpy return [J/kg]"]
-                - self.parameters.physics["specific enthalpy supply [J/kg]"]
-            )
+            self.parameters.physics["water density [kg/m^3]"]
+            * self.parameters.physics["specific enthalpy difference DW [J/kg]"]
+            * ets_flow
         )
         return heat_flow_from_building

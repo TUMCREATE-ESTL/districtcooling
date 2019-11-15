@@ -26,11 +26,8 @@ class CoolingPlant:
         chillers_water_flow
     ):
         evaporator_heat_flow = (
-            (
-                self.parameters.physics["specific enthalpy return [J/kg]"]
-                - self.parameters.physics["specific enthalpy supply [J/kg]"]
-            )
-            * self.parameters.physics["water density [kg/m^3]"]
+            self.parameters.physics["water density [kg/m^3]"]
+            * self.parameters.physics["specific enthalpy difference DW [J/kg]"]
             * chillers_water_flow
         )
         return evaporator_heat_flow
@@ -181,10 +178,7 @@ class CoolingPlant:
             * self.parameters.cooling_plant["TES initial charge ratio [-]"]
             + (
                 self.parameters.physics["water density [kg/m^3]"]
-                * (
-                    self.parameters.physics["specific enthalpy return [J/kg]"]
-                    - self.parameters.physics["specific enthalpy supply [J/kg]"]
-                )
+                * self.parameters.physics["specific enthalpy difference DW [J/kg]"]
             )
             * self.get_storage_total_flow_until_time_step(time_step, storage_water_flow_set)
         )
@@ -197,10 +191,7 @@ class CoolingPlant:
         # Calculate the energetic content of the storage
         storage_energy_change = (
             self.parameters.physics["water density [kg/m^3]"]
-            * (
-                self.parameters.physics["specific enthalpy return [J/kg]"]
-                - self.parameters.physics["specific enthalpy supply [J/kg]"]
-            )
+            * self.parameters.physics["specific enthalpy difference DW [J/kg]"]
             * (-1) * storage_flow
             * self.parameters.physics["duration of one time step [s]"]
         )

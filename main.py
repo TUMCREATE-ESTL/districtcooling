@@ -39,7 +39,6 @@ plotter.plot_graph(
     index_for_saving=1
 )
 
-"""
 ets_flow_time_array = grid.build_ets_flow_time_array(np.ones(parameters.buildings.shape[0]))
 print(ets_flow_time_array)
 
@@ -73,7 +72,7 @@ solution = optimizer.get_solution_as_dataframe(
     index_for_saving=1
 )
 print(solution)
-"""
+
 """
 # Iterative solving algorithm of optimization problem ------------------------------------------------------------------
 ets_head_difference_used, problem_result = optimizer.iterative_solver(
