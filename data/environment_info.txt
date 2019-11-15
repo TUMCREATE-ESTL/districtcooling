@@ -1,0 +1,15 @@
+** ENVIRONMENT.CSV **
+General info: CSV-File containing wet-bulb temperatures, electrical power prices and related information
+Author: Mischa Grussmann
+Purpose: Master Thesis - Test Case Demonstration
+
+WET-BULB:
+Based on: Singapore 486980 (IWEC) [EPW-file] - EnergyPlus version of the respective International Weather for Energy Calculations (IWEC) weather file from ASHRAE
+Retrieved from (on 10. November 2019): https://energyplus.net/weather-location/southwest_pacific_wmo_region_5/SGP//SGP_Singapore.486980_IWEC
+Calculation: Wet bulb is theoretically derived with the Python package CoolProp from the data of IWEC.
+Quadratic interpolation: weather data is only provided per hour, but prices per half hour. Therefore each half-hour wet-bulb is obtained through quadratic interpolation (with Python package Pandas).
+For the first half hour to be determinable this way a 00:00 time instance had to be added. It corresponds to the last instance of the weather data, meaning t_0 = t_17520.
+
+POWER PRICE:
+Type: Wholesale Electricity Prices 2018
+Retrieved from (on 10. November 2019): https://www.emcsg.com/marketdata/priceinformation#priceDataView

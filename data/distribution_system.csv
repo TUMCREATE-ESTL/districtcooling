@@ -2,4 +2,4 @@ PROPERTY,VALUE
 pump efficiency secondary pump [-],0.75
 head loss in heat exchanger ETS [m], 10
 minimum pipe velocity [m/s],0
-maximum pipe velocity [m/s],3
+maximum pipe velocity [m/s],1000
