@@ -34,18 +34,27 @@ optimizer = dc.LinearOptimizer(
 # Test objects =========================================================================================================
 
 # Non-linear simulation of the distribution system (DS) ----------------------------------------------------------------
-ets_flow_time_array = grid.build_ets_flow_time_array(np.ones(parameters.buildings.shape[0]))
-grid_simulation = grid.get_grid_simulation(ets_flow_time_array)
+plotter.plot_graph(
+    save=False,
+    index_for_saving=1
+)
 
+"""
+ets_flow_time_array = grid.build_ets_flow_time_array(np.ones(parameters.buildings.shape[0]))
+print(ets_flow_time_array)
+
+grid_simulation = grid.get_grid_simulation(ets_flow_time_array)
 print(grid_simulation)
+
 plotter.plot_grid_simulation(
     grid_simulation=grid_simulation,
     time_step=1,
     save=True,
     index_for_saving=1
 )
-
+"""
 # Linear simulation of the district cooling plant (DCP) ----------------------------------------------------------------
+"""
 plant_simulation = plant.get_plant_simulation(
     chiller_set_flow=0.2,
     tes_flow=0.1,
@@ -64,6 +73,7 @@ solution = optimizer.get_solution_as_dataframe(
     index_for_saving=1
 )
 print(solution)
+"""
 """
 # Iterative solving algorithm of optimization problem ------------------------------------------------------------------
 ets_head_difference_used, problem_result = optimizer.iterative_solver(

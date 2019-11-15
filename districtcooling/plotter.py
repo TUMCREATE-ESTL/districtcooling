@@ -130,8 +130,85 @@ class Plotter:
             plt.savefig(
                 os.path.join(
                     os.path.dirname(os.path.normpath(__file__)),
-                    '..', 'results', 'graph_plots', str(index_for_saving) + '_graph.png'
+                    '..', 'results', 'graph_plots', str(index_for_saving) + '_simulation.svg'
                 )
             )
 
         plt.show()
+
+    def plot_graph(
+        self,
+        save=False,
+        index_for_saving=0
+    ):
+        """
+        Plots the digraph of the grid
+        """
+
+        graph = nx.DiGraph()
+
+        # -------------------- Nodes
+        list_nodes = list(self.parameters.nodes.index)
+
+        pos_nodes = {
+            node: (
+                self.parameters.nodes['position-X'][node],
+                self.parameters.nodes['position-Y'][node]
+            ) for node in list_nodes
+        }
+
+        building_polygons = (
+            geopandas.read_file(
+                os.path.join(os.path.dirname(os.path.normpath(__file__)), '..', 'data', 'building_polygons.shp')
+            )
+        )
+        building_polygons.plot(color='grey')
+
+        nx.draw_networkx_nodes(
+            graph,
+            pos=pos_nodes,
+            nodelist=list_nodes,
+            node_color='c',
+            edgecolors='k',
+            node_size=150,
+            alpha=1
+        )
+        # Add labels to nodes
+        labels_for_nodes = {
+            node_id: node_id
+            for node_id in list_nodes}
+
+        nx.draw_networkx_labels(
+            graph,
+            pos=pos_nodes,
+            labels=labels_for_nodes,
+            font_size=8)
+
+        # -------------------- Lines (=edges)
+        list_edges = [
+            (
+                self.parameters.lines.loc[index]['Start'],
+                self.parameters.lines.loc[index]['End']
+            )
+            for index in self.parameters.lines.index
+        ]
+
+        nx.draw_networkx_edges(
+            graph,
+            pos_nodes,
+            edgelist=list_edges,
+            width=2.5,
+        )
+
+        # -------------------- Plot and save
+        plt.axis("off")
+        if save:
+            plt.savefig(
+                os.path.join(
+                    os.path.dirname(os.path.normpath(__file__)),
+                    '..', 'results', 'graph_plots', str(index_for_saving) + '_graph.svg'
+                )
+            )
+
+        plt.show()
+
