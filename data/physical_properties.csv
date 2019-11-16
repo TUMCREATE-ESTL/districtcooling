@@ -3,6 +3,6 @@ specific enthalpy difference DW [J/kg],37355
 specific enthalpy condenser cold [J/kg],25371
 specific enthalpy condenser warm [J/kg],58936
 water density [kg/m^3],998.31
-water kinematic viscosity [m^2/s],1.4714e-6
+water kinematic viscosity [m^2/s],1.3504e-6
 gravitational acceleration [m^2/s],9.81
 duration of one time step [s],1800

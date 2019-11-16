@@ -8,7 +8,7 @@ import numpy as np
 
 class CoolingGrid:
     """
-    Defines the model of the distribution system, including distribution piping system (DPS) and energy transfer
+    Simulation-tool for the distribution system, including distribution piping system (DPS) and energy transfer
     stations (ETS)
     """
 
@@ -109,11 +109,6 @@ class CoolingGrid:
         self,
         nodal_consumptions_time_array
     ):
-        """
-        :var nodal_consumption: volumetric flows entering or leaving the grid at its nodes, in [cbm/s].
-        :param self.incidence_matrix_transposed: grid-layout expressed as transposed incidence matrix.
-        :return: All volumetric flows of the grid's lines listed inside a panda, in [cbm/s].
-        """
         line_flows_temp = {
             time_step: np.linalg.solve(
                 self.incidence_matrix_transposed.values,
@@ -131,11 +126,6 @@ class CoolingGrid:
         pipe_flow,
         pipe_diameter
     ):
-        """
-        :var pipe_flow: volumetric flow through the pipe in cubic metres per second [cbm/s].
-        :param pipe_diameter: in metres [m].
-        :return: pipe's velocity in m per second [m/s].
-        """
         pipe_velocity = 4 * pipe_flow / (np.pi * pipe_diameter ** 2)
         return pipe_velocity
 
@@ -329,7 +319,7 @@ class CoolingGrid:
             time_step: [
                 2
                 * np.fabs(nodal_head_time_array[time_step][building_id])
-                + self.parameters.distribution_system["head loss in heat exchanger ETS [m]"]
+                + self.parameters.distribution_system["head loss in ETS [m]"]
                 for building_id in self.parameters.buildings.index
             ] for time_step in nodal_head_time_array.columns
         }
@@ -346,11 +336,11 @@ class CoolingGrid:
     ):
         central_pumping_power_time_dict = {
             time_step: (
-                    self.parameters.physics["water density [kg/m^3]"]
-                    * self.parameters.physics["gravitational acceleration [m^2/s]"]
-                    * self.parameters.distribution_system["pump efficiency secondary pump [-]"]
-                    * ets_head_difference_time_array[time_step].max()
-                    * np.fabs(central_flow_time_row[time_step][0])
+                (1 / self.parameters.distribution_system["pump efficiency secondary pump [-]"])
+                * self.parameters.physics["water density [kg/m^3]"]
+                * self.parameters.physics["gravitational acceleration [m^2/s]"]
+                * ets_head_difference_time_array[time_step].max()
+                * np.fabs(central_flow_time_row[time_step][0])
             )
             for time_step in ets_head_difference_time_array.columns
         }
@@ -367,9 +357,9 @@ class CoolingGrid:
     ):
         distributed_pumping_power_time_dict = {
             time_step: [
-                self.parameters.physics["water density [kg/m^3]"]
+                (1 / self.parameters.distribution_system["pump efficiency secondary pump [-]"])
+                * self.parameters.physics["water density [kg/m^3]"]
                 * self.parameters.physics["gravitational acceleration [m^2/s]"]
-                * self.parameters.distribution_system["pump efficiency secondary pump [-]"]
                 * ets_head_difference_time_array[time_step][ets_id]
                 * np.fabs(nodal_consumptions_time_array[time_step][ets_id])
                 for ets_id in ets_head_difference_time_array.index
@@ -466,15 +456,12 @@ class CoolingGrid:
         u_max
     ):
         diameters_dict = {
-            'Diameters': [
-                (
-                    (4 / np.pi)
-                    * (line_flows[line] / u_max)
-                ) ^ 0.5
-            ] for line in line_flows.index
+            line: [(4 * line_flows[line] / (np.pi * u_max))**0.5]
+            for line in line_flows.index
         }
-        diameters_df = pd.DataFrame(
+        diameters_df = pd.DataFrame.from_dict(
             data=diameters_dict,
-            index=[line for line in line_flows.index]
+            orient='index',
+            columns=['Critical diameter [m]']
         )
         return diameters_df

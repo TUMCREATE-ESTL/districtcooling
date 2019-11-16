@@ -60,9 +60,31 @@ parameters = dc.ParametersReader()
 grid = dc.CoolingGrid(parameters=parameters)
 plotter = dc.Plotter(parameters=parameters)
 
+# print(grid.incidence_matrix_complete)
+print(grid.incidence_matrix)
+# print(grid.incidence_matrix_potential)
+# print(grid.incidence_matrix_transposed)
+
+plotter.plot_graph(
+    save=False,
+    index_for_saving=0
+)
+
+ets_flows_timearray = grid.build_ets_flow_time_array(ets_flow_vector=ets_flows.values)
+print(ets_flows_timearray)
+
 simulation_wrong_diameters = grid.get_grid_simulation(
-    ets_flow_time_array=ets_flows.values
+    ets_flow_time_array=ets_flows_timearray
 )
 
 print(simulation_wrong_diameters)
+print(simulation_wrong_diameters[1]['Flow in lines [qbm/s]'][1.0])
+
+diameters_df = grid.get_diameters_from_flow(
+        line_flows=simulation_wrong_diameters[1]['Flow in lines [qbm/s]'],
+        u_max=2.0
+    )
+
+print(diameters_df)
+
 
