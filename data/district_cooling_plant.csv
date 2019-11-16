@@ -3,7 +3,7 @@ pump efficiency chillers pump [-],0.75
 head chillers pump [m],10
 evaporation temperature [Celsius],3
 COP efficiency [-],0.79
-chiller-set cooling capacity [W],20000000000000000000000000
+chiller-set cooling capacity [W],20000000000000000000000000000
 pump efficiency TES pump [-],0.75
 head TES pump [m],10
 TES energy capacity [J],20000000000

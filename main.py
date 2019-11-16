@@ -46,14 +46,14 @@ print(ets_flow_time_array)
 grid_simulation = grid.get_grid_simulation(ets_flow_time_array)
 print(grid_simulation)
 print(grid_simulation.loc["Head difference over ETSs [m]"])
-
+"""
 plotter.plot_grid_simulation(
     grid_simulation=grid_simulation,
     time_step=1,
     save=True,
     index_for_saving=1
 )
-
+"""
 # Linear simulation of the district cooling plant (DCP) ----------------------------------------------------------------
 """
 plant_simulation = plant.get_plant_simulation(
@@ -72,7 +72,7 @@ solved_optimization_problem = optimizer.build_and_solve_problem(
 solution = optimizer.get_solution_as_dataframe(
     solved_optimization_problem,
     save=True,
-    index_for_saving='fixed_temp'
+    index_for_saving='fixed_temp_sat'
 )
 print(solution)
 
