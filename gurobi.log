@@ -1,8 +1,0 @@
-
-Gurobi 8.1.1 (win64, Python) logging started 11/15/19 21:56:47
-
-Academic license - for non-commercial use only
-Error reading LP format file C:\Users\MISCHA~1.GRU\AppData\Local\Temp\tmpo0iszfqi.pyomo.lp at line 32955068
-Malformed term in expression
-Neighboring tokens: " nan x1 -73450.658249999993 x17521 +1 x5133361 "
-
