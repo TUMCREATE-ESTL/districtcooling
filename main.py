@@ -66,7 +66,8 @@ print(plant_simulation)
 # Building and solving optimization problem for a given ets head difference array --------------------------------------
 
 solved_optimization_problem = optimizer.build_and_solve_problem(
-    ets_head_difference_time_array=grid_simulation.loc["Head difference over ETSs [m]"],
+    ds_head_differences_time_array=grid_simulation.loc["Head difference over ETSs [m]"],
+    TES_capacity_Wh=0,
     distributed_secondary_pumping=True
 )
 solution = optimizer.get_solution_as_dataframe(

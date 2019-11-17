@@ -9,7 +9,7 @@ parameters = dc.ParametersReader()
 grid = dc.CoolingGrid(parameters=parameters)
 plant = dc.CoolingPlant(parameters=parameters)
 plotter = dc.Plotter(parameters=parameters)
-"""
+
 buildings_dict = {
     building_id: cobmo.building.Building(
         conn=cobmo.database_interface.connect_database(),
@@ -24,31 +24,82 @@ optimizer = dc.LinearOptimizer(
     coolingplant=plant,
     buildings_dict=buildings_dict
 )
-"""
+
 head_differences_ds = pd.read_csv(
     'data/headdifferencesETS_rounded.csv',
     index_col=[0]
 )
 print(head_differences_ds)
+print(head_differences_ds[str(1)].max())
 
 # Simulations ==========================================================================================================
 
-plant_simulation = plant.get_plant_simulation(
-    chiller_set_flow=0.2,
-    tes_flow=0.1,
-    air_wet_bulb=26
-)
-print(plant_simulation)
-
-"""
+# 1) TES = 0 Wh
 solved_optimization_problem = optimizer.build_and_solve_problem(
-    ets_head_difference_time_array=grid_simulation.loc["Head difference over ETSs [m]"],
-    distributed_secondary_pumping=True
+    ds_head_differences_time_array=head_differences_ds,
+    TES_capacity_Wh=-0.0001,
+    distributed_secondary_pumping=False
 )
 solution = optimizer.get_solution_as_dataframe(
     solved_optimization_problem,
-    save=False,
-    index_for_saving='fixed_temp_final_21'
+    save=True,
+    index_for_saving='TESTCASE_BuildT=flex_TES=0MWh_'
 )
+print('TES = 0 Wh')
 print(solution)
-"""
+
+# 2) TES = -625 MWh
+solved_optimization_problem = optimizer.build_and_solve_problem(
+    ds_head_differences_time_array=head_differences_ds,
+    TES_capacity_Wh=(-625*10**6),
+    distributed_secondary_pumping=False
+)
+solution = optimizer.get_solution_as_dataframe(
+    solved_optimization_problem,
+    save=True,
+    index_for_saving='TESTCASE_BuildT=flex_TES=625MWh_'
+)
+print('TES = 625 MWh')
+print(solution)
+
+# 3) TES = -1250 MWh
+solved_optimization_problem = optimizer.build_and_solve_problem(
+    ds_head_differences_time_array=head_differences_ds,
+    TES_capacity_Wh=(-1250*10**6),
+    distributed_secondary_pumping=False
+)
+solution = optimizer.get_solution_as_dataframe(
+    solved_optimization_problem,
+    save=True,
+    index_for_saving='TESTCASE_BuildT=flex_TES=1250MWh_'
+)
+print('TES = 1250 MWh')
+print(solution)
+
+# 4) TES = -1875 MWh
+solved_optimization_problem = optimizer.build_and_solve_problem(
+    ds_head_differences_time_array=head_differences_ds,
+    TES_capacity_Wh=(-1875*10**6),
+    distributed_secondary_pumping=False
+)
+solution = optimizer.get_solution_as_dataframe(
+    solved_optimization_problem,
+    save=True,
+    index_for_saving='TESTCASE_BuildT=flex_TES=1875MWh_'
+)
+print('TES = 1875 MWh')
+print(solution)
+
+# 5) TES = -2500 MWh
+solved_optimization_problem = optimizer.build_and_solve_problem(
+    ds_head_differences_time_array=head_differences_ds,
+    TES_capacity_Wh=(-2500*10**6),
+    distributed_secondary_pumping=False
+)
+solution = optimizer.get_solution_as_dataframe(
+    solved_optimization_problem,
+    save=True,
+    index_for_saving='TESTCASE_BuildT=flex_TES=2500MWh_'
+)
+print('TES = 2500 MWh')
+print(solution)

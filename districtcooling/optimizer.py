@@ -39,7 +39,8 @@ class LinearOptimizer:
 
     def build_and_solve_problem(
         self,
-        ets_head_difference_time_array,
+        ds_head_differences_time_array,
+        TES_capacity_Wh,
         distributed_secondary_pumping=False
     ):
         # Create PYOMO-Problem -----------------------------------------------------------------------------------------
@@ -114,10 +115,10 @@ class LinearOptimizer:
         """ 1. Storage energy content is introduced as pseudo-variable with its capacity as upper boundary """
         problem.storage_energy_content = py.Var(
             problem.time_set,
-            domain=py.NonNegativeReals,
+            domain=py.NegativeReals,
             bounds=(
-                0,
-                self.parameters.cooling_plant["TES energy capacity [J]"]
+                TES_capacity_Wh,
+                0
             )
         )
         """ 2. Storage's flows are linked with its energy content"""
@@ -129,9 +130,9 @@ class LinearOptimizer:
                 rule = (
                     problem.storage_energy_content[time_step]
                     == (
-                        self.parameters.cooling_plant["TES energy capacity [J]"]
-                        * self.parameters.cooling_plant["TES initial charge ratio [-]"]
-                        + self.modelled_plant.get_storage_energy_change_optimization_rule(
+                            TES_capacity_Wh
+                            * self.parameters.cooling_plant["TES initial charge ratio [-]"]
+                            + self.modelled_plant.get_storage_energy_change_optimization_rule(
                             problem.storage_flow_var[time_step]
                         )
                     )
@@ -159,8 +160,8 @@ class LinearOptimizer:
             rule = (
                 problem.storage_energy_content[problem.time_set[-1]]
                 == (
-                    self.parameters.cooling_plant["TES energy capacity [J]"]
-                    * self.parameters.cooling_plant["TES terminal charge ratio [-]"]
+                        TES_capacity_Wh
+                        * self.parameters.cooling_plant["TES terminal charge ratio [-]"]
                 )
             )
             return rule
@@ -549,10 +550,10 @@ class LinearOptimizer:
                 rule = (
                     problem.distribution_system_total_power[time_step]
                     == py.quicksum(
-                        self.parameters.physics["water density [kg/m^3]"]
+                        (1 / self.parameters.distribution_system["pump efficiency secondary pump [-]"])
+                        * self.parameters.physics["water density [kg/m^3]"]
                         * self.parameters.physics["gravitational acceleration [m^2/s]"]
-                        * self.parameters.distribution_system["pump efficiency secondary pump [-]"]
-                        * ets_head_difference_time_array[time_step][building_id]
+                        * ds_head_differences_time_array[str(time_step)][building_id]
                         * problem.ets_flows_var[time_step, building_id]
                         for building_id in problem.building_ids
                     )
@@ -563,11 +564,11 @@ class LinearOptimizer:
                 rule = (
                     problem.distribution_system_total_power[time_step]
                     == (
-                        self.parameters.physics["water density [kg/m^3]"]
-                        * self.parameters.physics["gravitational acceleration [m^2/s]"]
-                        * self.parameters.distribution_system["pump efficiency secondary pump [-]"]
-                        * ets_head_difference_time_array[time_step].max()
-                        * problem.total_flow_demand[time_step]
+                            (1 / self.parameters.distribution_system["pump efficiency secondary pump [-]"])
+                            * self.parameters.physics["water density [kg/m^3]"]
+                            * self.parameters.physics["gravitational acceleration [m^2/s]"]
+                            * ds_head_differences_time_array[str(time_step)].max()
+                            * problem.total_flow_demand[time_step]
                     )
                 )
                 return rule
@@ -577,6 +578,61 @@ class LinearOptimizer:
             rule=distribution_system_pumping_power_rule
         )
 
+        # CONSTRAINT 13: Introduce total power DCS in MW
+        """ 1. DCS's total electric power consumption is introduced as pseudo-variables in MW"""
+        problem.dcs_total_power = py.Var(
+            problem.time_set,
+            domain=py.NonNegativeReals
+        )
+        """ 2. DCS's total electric power consumption results from DS and DCP's power consumption"""
+        def dcs_total_power_rule(
+            problem,
+            time_step
+        ):
+            rule = (
+                    problem.dcs_total_power[time_step]
+                    == (
+                        (
+                            problem.district_cooling_plant_total_power[time_step]
+                            + problem.distribution_system_total_power[time_step]
+                        )
+                        / (10 ** 6)
+                    )
+            )
+            return rule
+        problem.dcs_total_power_constraint = py.Constraint(
+            problem.time_set,
+            rule=dcs_total_power_rule
+        )
+
+        # CONSTRAINT 14: Define Costs
+        """ 1. Costs are introduced as pseudo-variables """
+        problem.costs = py.Var(
+            problem.time_set,
+            domain=py.NonNegativeReals
+        )
+        """ 2. Costs result from energy price and DCS's power consumption"""
+
+        def costs_rule(
+                problem,
+                time_step
+        ):
+            rule = (
+                    problem.costs[time_step]
+                    == (
+                        problem.dcs_total_power[time_step]
+                        * self.parameters.environment["Price [S$/MWh]"][time_step]
+                        * self.parameters.physics["duration of one time step [h]"]
+                    )
+            )
+            return rule
+
+        problem.costs_constraint = py.Constraint(
+            problem.time_set,
+            rule=costs_rule
+        )
+
+
         # Create PYOMO-Objective ---------------------------------------------------------------------------------------
         def objective_cost_minimum(
             problem
@@ -584,13 +640,7 @@ class LinearOptimizer:
             rule = (
                 py.quicksum(
                     (
-                        self.parameters.environment["Price [S$/MWh]"][time_step]
-                        / (10 ** 6)
-                        * (
-                            problem.distribution_system_total_power[time_step]
-                            + problem.district_cooling_plant_total_power[time_step]
-                        )
-                        * 0.5
+                        problem.costs[time_step]
                     ) for time_step in problem.time_set
                 )
             )
@@ -707,6 +757,21 @@ class LinearOptimizer:
         #     data=buildings_temperature_dict,
         #     index=[building_id for building_id in problem.building_ids]
         # )
+        dcs_total_power_dict = {
+            time_step: problem.dcs_total_power[time_step]() for time_step in problem.time_set
+        }
+        dcs_total_power_frame = pd.DataFrame(
+            data=dcs_total_power_dict,
+            index=[None]
+        )
+        costs_dict = {
+            time_step: problem.costs[time_step]() for time_step in problem.time_set
+        }
+        costs_frame = pd.DataFrame(
+            data=costs_dict,
+            index=[None]
+        )
+
         solution_frame = pd.concat(
             [
                 dcp_power_frame,
@@ -720,8 +785,10 @@ class LinearOptimizer:
                 lines_flow_frame,
                 lines_velocity_frame,
                 buildings_heat_inflow_frame,
-                # buildings_temperature_frame
-             ],
+                # buildings_temperature_frame,
+                dcs_total_power_frame,
+                costs_frame
+            ],
             keys=[
                 'DCP power [W]',
                 'Heat-intake evaporator [W]',
@@ -734,7 +801,9 @@ class LinearOptimizer:
                 'Lines flow [qbm/s]',
                 'Lines velocity [m/s]',
                 'Heat-inflow buildings [W]',
-                # 'Building temperature [C]'
+                # 'Building temperature [C]',
+                'DCS total Power in [MW]',
+                'Costs in [S$]'
             ]
         )
         solution_frame.index.names = ['VARIABLES', 'IDs']
@@ -798,7 +867,7 @@ class LinearOptimizer:
 
             # Linear optimization with ETS head differences calculated by non-linear grid simulation
             solution_linear_optimization = self.build_and_solve_problem(
-                ets_head_difference_time_array=grid_simulation.loc["Head difference over ETSs [m]"],
+                ds_head_differences_time_array=grid_simulation.loc["Head difference over ETSs [m]"],
                 distributed_secondary_pumping=distributed_secondary_pumping
             )
 
