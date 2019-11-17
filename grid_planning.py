@@ -118,7 +118,7 @@ simulation_right_diameters = grid.get_grid_simulation(
     ets_flow_time_array=ets_flows_timearray
 )
 print(simulation_right_diameters.loc['Flow in lines [qbm/s]'])
-print(simulation_right_diameters.loc['Head difference over ETSs [m]'])
+print(simulation_right_diameters.loc['Head difference over ETSs [m]'][1].max())
 plotter.plot_grid_simulation(
     grid_simulation=simulation_right_diameters,
     time_step=1,
