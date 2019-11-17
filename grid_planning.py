@@ -40,11 +40,12 @@ max_df = pd.DataFrame.from_dict(
              'Index flow'
              ]
 )
-print(max_df)
+print(max_df['Maximal heat flow [MW]'])
+print(max_df['Maximal heat flow [MW]'].sum())
 
-max_df.to_csv(
-    'results/csv_files/max_buildings_from_optimization_rounded.csv'
-)
+#max_df.to_csv(
+ #   'results/csv_files/max_buildings_from_optimization_rounded.csv'
+#)
 """
 # With full-load ETS determine full-load line flows and diamaters ======================================================
 """

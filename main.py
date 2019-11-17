@@ -71,7 +71,7 @@ solved_optimization_problem = optimizer.build_and_solve_problem(
 )
 solution = optimizer.get_solution_as_dataframe(
     solved_optimization_problem,
-    save=True,
+    save=False,
     index_for_saving='fixed_temp_final_21'
 )
 print(solution)
