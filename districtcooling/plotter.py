@@ -62,7 +62,7 @@ class Plotter:
             graph,
             pos=pos_nodes,
             labels=labels_for_nodes,
-            font_size=8)
+            font_size=10)
 
         # -------------------- Lines (=edges)
         list_edges = [
@@ -75,7 +75,7 @@ class Plotter:
 
         weight_lines = [
             grid_simulation.loc["Flow in lines [qbm/s]"][time_step][index]
-            * 8
+            * 4.5
             for index in self.parameters.lines.index
         ]
 
@@ -122,8 +122,11 @@ class Plotter:
             graph,
             pos=pos_nodes,
             edge_labels=labels_for_lines,
-            font_size=8
+            bbox=dict(alpha=0),
+            font_size=8,
+            rotate=False
         )
+
         # -------------------- Plot and save
         plt.axis("off")
         if save:
