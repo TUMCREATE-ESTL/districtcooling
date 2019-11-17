@@ -1,17 +1,19 @@
 PROPERTY,VALUE
-pump efficiency chillers pump [-],0.75
-head chillers pump [m],10
-evaporation temperature [Celsius],3
-COP efficiency [-],0.79
-chiller-set cooling capacity [W],20000000000000000000000000000
-pump efficiency TES pump [-],0.75
-head TES pump [m],10
-TES energy capacity [J],20000000000
+pumping total efficiency [-],0.75
+pump head CW [m],17.8
+pump head evaporators [m],10
+pump head TES [m],10
+chiller-set beta [-],0.421
+chiller-set delta T cnd min [K],1.1
+chiller-set evaporation T [K],276.45
+chiller-set cooling capacity [W],560560000
+CW delta T [K],5.560
+CTS reference T CW supply [C],29.44
+CTS reference T wet-bulb [C],25.56
+CTS reference T slope [-],0.8
+CTS ventilation factor [-],0.0115
 TES initial charge ratio [-],0.5
 TES terminal charge ratio [-],0.5
-pump efficiency condenser pump [-],0.75
-head condenser pump [m],10
-ventilation factor cooling towers [J/J],0.03
 
 
 

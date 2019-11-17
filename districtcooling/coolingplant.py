@@ -32,37 +32,71 @@ class CoolingPlant:
         )
         return evaporator_heat_flow
 
+    def get_cw_supply_temperature(
+        self,
+        air_wet_bulb
+    ):
+        cw_supply_temperature = (
+            self.parameters.cooling_plant["CTS reference T CW supply [C]"]
+            + (
+                self.parameters.cooling_plant["CTS reference T slope [-]"]
+                * (
+                    air_wet_bulb
+                    - self.parameters.cooling_plant["CTS reference T wet-bulb [C]"]
+                )
+            )
+        )
+        return cw_supply_temperature
+
+
     def get_chillers_condensation_temperature(
         self,
         air_wet_bulb
     ):
-        condensation_temperature = 12.47 + 0.727 * air_wet_bulb
+        cw_supply_temperature = self.get_cw_supply_temperature(
+            air_wet_bulb
+        )
+        condensation_temperature = (
+            cw_supply_temperature
+            + 273.15
+            + self.parameters.cooling_plant["CW delta T [K]"]
+            + self.parameters.cooling_plant["chiller-set delta T cnd min [K]"]
+        )
         return condensation_temperature
 
-    def get_chillers_cop(
+    def get_chillers_inverse_cop(
         self,
         air_wet_bulb
     ):
-        cop = (
-            self.parameters.cooling_plant["COP efficiency [-]"]
-            * (
-                self.parameters.cooling_plant["evaporation temperature [Celsius]"] + 273.15
+        condensation_temperature = self.get_chillers_condensation_temperature(
+            air_wet_bulb
+        )
+        inverse_cop = (
+            (
+                (
+                    condensation_temperature
+                    / self.parameters.cooling_plant["chiller-set evaporation T [K]"]
+                )
+                - 1
             )
-            / (
-                self.get_chillers_condensation_temperature(air_wet_bulb)
-                - self.parameters.cooling_plant["evaporation temperature [Celsius]"]
+            * (
+                self.parameters.cooling_plant["chiller-set beta [-]"]
+                + 1
             )
         )
-        return cop
+        return inverse_cop
 
     def get_chillers_power(
         self,
         chillers_water_flow,
         air_wet_bulb
     ):
+        inverse_cop = self.get_chillers_inverse_cop(
+            air_wet_bulb
+        )
         power_chillers = (
-            self.get_chillers_evaporator_heat_flow(chillers_water_flow)
-            / self.get_chillers_cop(air_wet_bulb)
+            inverse_cop
+            * self.get_chillers_evaporator_heat_flow(chillers_water_flow)
         )
         return power_chillers
 
@@ -72,117 +106,135 @@ class CoolingPlant:
         air_wet_bulb
     ):
         condenser_heat_flow = (
-            self.get_chillers_evaporator_heat_flow(chillers_water_flow)
-            + self.get_chillers_power(chillers_water_flow, air_wet_bulb)
+            self.get_chillers_evaporator_heat_flow(
+                chillers_water_flow
+            )
+            + self.get_chillers_power(
+                chillers_water_flow,
+                air_wet_bulb
+            )
         )
         return condenser_heat_flow
 
-    def get_chillers_pumping_power(
+    def get_evaporator_pumping_power(
         self,
         chillers_water_flow
     ):
-       chillers_pumping_power = (
-            self.parameters.physics["gravitational acceleration [m^2/s]"]
+       evaporator_pumping_power = (
+           (1 / self.parameters.cooling_plant["pumping total efficiency [-]"])
+            * self.parameters.physics["gravitational acceleration [m^2/s]"]
             * self.parameters.physics["water density [kg/m^3]"]
-            * self.parameters.cooling_plant["pump efficiency chillers pump [-]"]
-            * self.parameters.cooling_plant["head chillers pump [m]"]
+            * self.parameters.cooling_plant["pump head evaporators [m]"]
             * chillers_water_flow
        )
-       return chillers_pumping_power
+       return evaporator_pumping_power
 
     # Methods for condenser water-circuit calculations -----------------------------------------------------------------
 
-    def get_condenser_circuit_water_flow(
+    def get_CW_water_flow(
         self,
         chillers_water_flow,
         air_wet_bulb
     ):
-        condenser_circuit_water_flow = (
-            self.get_chillers_condenser_heat_flow(chillers_water_flow, air_wet_bulb)
+        condenser_heat_flow = self.get_chillers_condenser_heat_flow(
+            chillers_water_flow,
+            air_wet_bulb
+        )
+        CW_water_flow = (
+            condenser_heat_flow
             / (
                 self.parameters.physics["water density [kg/m^3]"]
-                * (
-                    self.parameters.physics["specific enthalpy condenser warm [J/kg]"]
-                    - self.parameters.physics["specific enthalpy condenser cold [J/kg]"]
-                )
+                * self.parameters.physics["specific enthalpy difference CW [J/kg]"]
             )
         )
-        return condenser_circuit_water_flow
+        return CW_water_flow
 
-    def get_condenser_circuit_pumping_power(
+    def get_CW_pumping_power(
         self,
         chillers_water_flow,
         air_wet_bulb
     ):
-        condenser_circuit_pumping_power = (
-                self.parameters.physics["gravitational acceleration [m^2/s]"]
-                * self.parameters.physics["water density [kg/m^3]"]
-                * self.parameters.cooling_plant["pump efficiency condenser pump [-]"]
-                * self.parameters.cooling_plant["head condenser pump [m]"]
-                * self.get_condenser_circuit_water_flow(chillers_water_flow, air_wet_bulb)
+        CW_water_flow = self.get_CW_water_flow(
+            chillers_water_flow,
+            air_wet_bulb
         )
-        return condenser_circuit_pumping_power
+        CW_pumping_power = (
+                (1 / self.parameters.cooling_plant["pumping total efficiency [-]"])
+                * self.parameters.physics["gravitational acceleration [m^2/s]"]
+                * self.parameters.physics["water density [kg/m^3]"]
+                * self.parameters.cooling_plant["pump head CW [m]"]
+                * CW_water_flow
+        )
+        return CW_pumping_power
 
     # Methods for Cooling Towers calculations --------------------------------------------------------------------------
 
-    def get_cooling_towers_power(
+    def get_CTS_ventilation_power(
         self,
         chillers_water_flow,
         air_wet_bulb
     ):
-        cooling_towers_power = (
-            self.get_chillers_condenser_heat_flow(chillers_water_flow, air_wet_bulb)
-            * self.parameters.cooling_plant["ventilation factor cooling towers [J/J]"]
+        condenser_heat_flow = self.get_chillers_condenser_heat_flow(
+            chillers_water_flow,
+            air_wet_bulb
         )
-        return cooling_towers_power
+        ventilation_power = (
+            self.parameters.cooling_plant["CTS ventilation factor [-]"]
+            * condenser_heat_flow
+        )
+        return ventilation_power
 
     # Methods for thermal energy storage calculations ------------------------------------------------------------------
 
-    def get_storage_pumping_power(
+    def get_TES_pumping_power(
         self,
-        storage_water_flow
+        TES_water_flow
     ):
-        storage_pumping_power = (
-                self.parameters.physics["gravitational acceleration [m^2/s]"]
+        TES_pumping_power = (
+                (1 / self.parameters.cooling_plant["pumping total efficiency [-]"])
+                * self.parameters.physics["gravitational acceleration [m^2/s]"]
                 * self.parameters.physics["water density [kg/m^3]"]
-                * self.parameters.cooling_plant["pump efficiency TES pump [-]"]
-                * self.parameters.cooling_plant["head TES pump [m]"]
-                * storage_water_flow
+                * self.parameters.cooling_plant["pump head TES [m]"]
+                * TES_water_flow
         )
-        return storage_pumping_power
+        return TES_pumping_power
 
-    def get_storage_total_flow_until_time_step(
+    def get_TES_flow_sum_until_time_step(
         self,
         time_step,
-        storage_water_flow_set
+        TES_water_flow_set
     ):
-        storage_total_flow_until_time_step = 0
+        TES_flow_sum_until_time_step = 0
         for time in self.parameters.environment.index:
-            storage_total_flow_until_time_step += (
-                (-1) # positive flow of variable means supplying the grid, resulting in storage-discharge
-                *storage_water_flow_set[time]
-                * self.parameters.physics["duration of one time step [s]"]
+            TES_flow_sum_until_time_step += (
+                TES_water_flow_set[time]
             )
             if time == time_step:
                 break
-        return storage_total_flow_until_time_step
+        return TES_flow_sum_until_time_step
 
-    def get_storage_energy_content(
+    def get_TES_energy_content(
         self,
         time_step,
-        storage_water_flow_set,
+        TES_water_flow_set,
+        TES_capacity_Wh
     ):
+        TES_flow_sum_until_time_step = self.get_TES_flow_sum_until_time_step(
+            time_step,
+            TES_water_flow_set
+        )
         # Calculate the energetic content of the storage
-        storage_energy_content = (
-            self.parameters.cooling_plant["TES energy capacity [J]"]
+        TES_energy_content = (
+            TES_capacity_Wh
             * self.parameters.cooling_plant["TES initial charge ratio [-]"]
             + (
                 self.parameters.physics["water density [kg/m^3]"]
                 * self.parameters.physics["specific enthalpy difference DW [J/kg]"]
+                * self.parameters.physics["duration of one time step [h]"]
+                * TES_flow_sum_until_time_step
             )
-            * self.get_storage_total_flow_until_time_step(time_step, storage_water_flow_set)
         )
-        return storage_energy_content
+        return TES_energy_content
 
     def get_storage_energy_change_optimization_rule(
         self,
@@ -192,8 +244,8 @@ class CoolingPlant:
         storage_energy_change = (
             self.parameters.physics["water density [kg/m^3]"]
             * self.parameters.physics["specific enthalpy difference DW [J/kg]"]
-            * (-1) * storage_flow
-            * self.parameters.physics["duration of one time step [s]"]
+            * storage_flow
+            * self.parameters.physics["duration of one time step [h]"]
         )
         return storage_energy_change
 
@@ -207,10 +259,10 @@ class CoolingPlant:
     ):
         plant_total_power = (
             self.get_chillers_power(chillers_water_flow, air_wet_bulb)
-            + self.get_chillers_pumping_power(chillers_water_flow)
-            + self.get_condenser_circuit_pumping_power(chillers_water_flow, air_wet_bulb)
-            + self.get_cooling_towers_power(chillers_water_flow, air_wet_bulb)
-            + self.get_storage_pumping_power(storage_water_flow)
+            + self.get_evaporator_pumping_power(chillers_water_flow)
+            + self.get_CW_pumping_power(chillers_water_flow, air_wet_bulb)
+            + self.get_CTS_ventilation_power(chillers_water_flow, air_wet_bulb)
+            + self.get_TES_pumping_power(storage_water_flow)
         )
         return plant_total_power
 
@@ -227,23 +279,23 @@ class CoolingPlant:
             storage_water_flow=tes_flow,
             air_wet_bulb=air_wet_bulb
         )
-        storage_pumping_power = self.get_storage_pumping_power(
-            storage_water_flow=tes_flow
+        storage_pumping_power = self.get_TES_pumping_power(
+            TES_water_flow=tes_flow
         )
-        cooling_towers_power = self.get_cooling_towers_power(
+        cooling_towers_power = self.get_CTS_ventilation_power(
             chillers_water_flow=chiller_set_flow,
             air_wet_bulb=air_wet_bulb
         )
-        condenser_circuit_water_flow = self.get_condenser_circuit_water_flow(
+        condenser_circuit_water_flow = self.get_CW_water_flow(
             chillers_water_flow=chiller_set_flow,
             air_wet_bulb=air_wet_bulb
         )
-        condenser_circuit_pumping_power = self.get_condenser_circuit_pumping_power(
+        condenser_circuit_pumping_power = self.get_CW_pumping_power(
             chillers_water_flow=chiller_set_flow,
             air_wet_bulb=air_wet_bulb
         )
-        chillers_pumping_power = self.get_chillers_pumping_power(
-            chillers_water_flow = chiller_set_flow
+        chillers_pumping_power = self.get_evaporator_pumping_power(
+            chillers_water_flow=chiller_set_flow
         )
         chillers_evaporator_heat_flow = self.get_chillers_evaporator_heat_flow(
             chillers_water_flow=chiller_set_flow
@@ -256,7 +308,7 @@ class CoolingPlant:
             chillers_water_flow=chiller_set_flow,
             air_wet_bulb=air_wet_bulb
         )
-        chiller_set_cop = self.get_chillers_cop(
+        chiller_set_inverse_cop = self.get_chillers_inverse_cop(
             air_wet_bulb=air_wet_bulb
         )
         simulation = pd.Series(
@@ -267,7 +319,7 @@ class CoolingPlant:
                 storage_pumping_power,
                 chillers_pumping_power,
                 chillers_evaporator_heat_flow,
-                chiller_set_cop,
+                chiller_set_inverse_cop,
                 chiller_set_power,
                 chillers_condenser_heat_flow,
                 condenser_circuit_water_flow,
@@ -276,18 +328,18 @@ class CoolingPlant:
                 plant_total_power
             ],
             index=[
-                'Chiller-set flow in [qbm/s]',
-                'TES flow in [qbm/s]',
+                'Chiller-set flow in [m3/s]',
+                'TES flow in [m3/s]',
                 'Air wet-bulb [C]',
                 'TES pumping power [W]',
                 'Evaporators pumping power [W]',
                 'Evaporator heat flow [W]',
-                'Chiller-Set COP [-]',
+                'Chiller-Set COP^(-1) [-]',
                 'Chiller-Set Power [W]',
                 'Condenser heat flow [W]',
-                'Condenser water flow [qbm/s]',
+                'Condenser water flow [m3/s]',
                 'Condenser pumping [W]',
-                'Cooling towers power [W]',
+                'CTS ventilation power [W]',
                 'DCP total power demand [W]'
             ]
         )
