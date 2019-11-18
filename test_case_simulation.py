@@ -43,7 +43,7 @@ solved_optimization_problem = optimizer.build_and_solve_problem(
 solution = optimizer.get_solution_as_dataframe(
     solved_optimization_problem,
     save=True,
-    index_for_saving='TESTCASE_BuildT=flex_TES=0MWh_'
+    index_for_saving='TESTCASE_BuildT=fixed25_TES=0MWh_'
 )
 print('TES = 0 Wh')
 print(solution)
@@ -57,7 +57,7 @@ solved_optimization_problem = optimizer.build_and_solve_problem(
 solution = optimizer.get_solution_as_dataframe(
     solved_optimization_problem,
     save=True,
-    index_for_saving='TESTCASE_BuildT=flex_TES=625MWh_'
+    index_for_saving='TESTCASE_BuildT=fixed25_TES=625MWh_'
 )
 print('TES = 625 MWh')
 print(solution)
@@ -71,7 +71,7 @@ solved_optimization_problem = optimizer.build_and_solve_problem(
 solution = optimizer.get_solution_as_dataframe(
     solved_optimization_problem,
     save=True,
-    index_for_saving='TESTCASE_BuildT=flex_TES=1250MWh_'
+    index_for_saving='TESTCASE_BuildT=fixed25_TES=1250MWh_'
 )
 print('TES = 1250 MWh')
 print(solution)
@@ -85,7 +85,7 @@ solved_optimization_problem = optimizer.build_and_solve_problem(
 solution = optimizer.get_solution_as_dataframe(
     solved_optimization_problem,
     save=True,
-    index_for_saving='TESTCASE_BuildT=flex_TES=1875MWh_'
+    index_for_saving='TESTCASE_BuildT=fixed25_TES=1875MWh_'
 )
 print('TES = 1875 MWh')
 print(solution)
@@ -99,7 +99,7 @@ solved_optimization_problem = optimizer.build_and_solve_problem(
 solution = optimizer.get_solution_as_dataframe(
     solved_optimization_problem,
     save=True,
-    index_for_saving='TESTCASE_BuildT=flex_TES=2500MWh_'
+    index_for_saving='TESTCASE_BuildT=fixed25TES=2500MWh_'
 )
 print('TES = 2500 MWh')
 print(solution)
