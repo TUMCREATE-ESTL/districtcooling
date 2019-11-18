@@ -37,13 +37,13 @@ print(head_differences_ds[str(1)].max())
 # 1) TES = 0 Wh
 solved_optimization_problem = optimizer.build_and_solve_problem(
     ds_head_differences_time_array=head_differences_ds,
-    TES_capacity_Wh=-0.0001,
+    TES_capacity_Wh=-0.00000001,
     distributed_secondary_pumping=False
 )
 solution = optimizer.get_solution_as_dataframe(
     solved_optimization_problem,
     save=True,
-    index_for_saving='TESTCASE_BuildT=fixed25_TES=0MWh_'
+    index_for_saving='TESTCASE_BuildT=fixed25_TES=0MWh_CSP_'
 )
 print('TES = 0 Wh')
 print(solution)
@@ -57,7 +57,7 @@ solved_optimization_problem = optimizer.build_and_solve_problem(
 solution = optimizer.get_solution_as_dataframe(
     solved_optimization_problem,
     save=True,
-    index_for_saving='TESTCASE_BuildT=fixed25_TES=625MWh_'
+    index_for_saving='TESTCASE_BuildT=fixed25_TES=625MWh_CSP_'
 )
 print('TES = 625 MWh')
 print(solution)
@@ -71,7 +71,7 @@ solved_optimization_problem = optimizer.build_and_solve_problem(
 solution = optimizer.get_solution_as_dataframe(
     solved_optimization_problem,
     save=True,
-    index_for_saving='TESTCASE_BuildT=fixed25_TES=1250MWh_'
+    index_for_saving='TESTCASE_BuildT=fixed25_TES=1250MWh_CSP_'
 )
 print('TES = 1250 MWh')
 print(solution)
@@ -85,7 +85,7 @@ solved_optimization_problem = optimizer.build_and_solve_problem(
 solution = optimizer.get_solution_as_dataframe(
     solved_optimization_problem,
     save=True,
-    index_for_saving='TESTCASE_BuildT=fixed25_TES=1875MWh_'
+    index_for_saving='TESTCASE_BuildT=fixed25_TES=1875MWh_CSP_'
 )
 print('TES = 1875 MWh')
 print(solution)
@@ -99,7 +99,7 @@ solved_optimization_problem = optimizer.build_and_solve_problem(
 solution = optimizer.get_solution_as_dataframe(
     solved_optimization_problem,
     save=True,
-    index_for_saving='TESTCASE_BuildT=fixed25TES=2500MWh_'
+    index_for_saving='TESTCASE_BuildT=fixed25TES=2500MWh_CSP_'
 )
 print('TES = 2500 MWh')
 print(solution)
