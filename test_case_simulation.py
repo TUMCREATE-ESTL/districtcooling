@@ -40,12 +40,12 @@ print(head_differences_ds[str(1)].max())
 solved_optimization_problem = optimizer.build_and_solve_problem(
     ds_head_differences_time_array=head_differences_ds,
     TES_capacity_Wh=-0.00000001,
-    distributed_secondary_pumping=True
+    distributed_secondary_pumping=False
 )
 solution = optimizer.get_solution_as_dataframe(
     solved_optimization_problem,
     save=True,
-    index_for_saving='TESTCASE_BuildT=fixed25_TES=0MWh_DSP_'
+    index_for_saving='TESTCASE_BuildT=flex21-25_TES=0MWh_CSP_'
 )
 print('TES = 0 Wh')
 print(solution)
@@ -54,12 +54,12 @@ print(solution)
 solved_optimization_problem = optimizer.build_and_solve_problem(
     ds_head_differences_time_array=head_differences_ds,
     TES_capacity_Wh=(-625*10**6),
-    distributed_secondary_pumping=True
+    distributed_secondary_pumping=False
 )
 solution = optimizer.get_solution_as_dataframe(
     solved_optimization_problem,
     save=True,
-    index_for_saving='TESTCASE_BuildT=fixed25_TES=625MWh_DSP_'
+    index_for_saving='TESTCASE_BuildT=flex21-25_TES=625MWh_CSP_'
 )
 print('TES = 625 MWh')
 print(solution)
@@ -68,12 +68,12 @@ print(solution)
 solved_optimization_problem = optimizer.build_and_solve_problem(
     ds_head_differences_time_array=head_differences_ds,
     TES_capacity_Wh=(-1250*10**6),
-    distributed_secondary_pumping=True
+    distributed_secondary_pumping=False
 )
 solution = optimizer.get_solution_as_dataframe(
     solved_optimization_problem,
     save=True,
-    index_for_saving='TESTCASE_BuildT=fixed25_TES=1250MWh_DSP_'
+    index_for_saving='TESTCASE_BuildT=flex21-25_TES=1250MWh_CSP_'
 )
 print('TES = 1250 MWh')
 print(solution)
@@ -82,12 +82,12 @@ print(solution)
 solved_optimization_problem = optimizer.build_and_solve_problem(
     ds_head_differences_time_array=head_differences_ds,
     TES_capacity_Wh=(-1875*10**6),
-    distributed_secondary_pumping=True
+    distributed_secondary_pumping=False
 )
 solution = optimizer.get_solution_as_dataframe(
     solved_optimization_problem,
     save=True,
-    index_for_saving='TESTCASE_BuildT=fixed25_TES=1875MWh_DSP_'
+    index_for_saving='TESTCASE_BuildT=flex21-25_TES=1875MWh_CSP_'
 )
 print('TES = 1875 MWh')
 print(solution)
@@ -96,19 +96,20 @@ print(solution)
 solved_optimization_problem = optimizer.build_and_solve_problem(
     ds_head_differences_time_array=head_differences_ds,
     TES_capacity_Wh=(-2500*10**6),
-    distributed_secondary_pumping=True
+    distributed_secondary_pumping=False
 )
 solution = optimizer.get_solution_as_dataframe(
     solved_optimization_problem,
     save=True,
-    index_for_saving='TESTCASE_BuildT=fixed25_TES=2500MWh_DSP_'
+    index_for_saving='TESTCASE_BuildT=flex21-25_TES=2500MWh_CSP_'
 )
 print('TES = 2500 MWh')
 print(solution)
 
-# Price fixed at average with flex building ------------------------------------------------------------
-# TES = 2500 MWh
-"""solved_optimization_problem = optimizer.build_and_solve_problem(
+# Price fixed at average value with flexible buildings -----------------------------------------------------------------
+
+"""# TES = 2500 MWh
+solved_optimization_problem = optimizer.build_and_solve_problem(
     ds_head_differences_time_array=head_differences_ds,
     TES_capacity_Wh=(-2500*10**6),
     distributed_secondary_pumping=False
@@ -119,9 +120,9 @@ solution = optimizer.get_solution_as_dataframe(
     index_for_saving='TESTCASE_Price=const110.5_BuildT=flex21-25_TES=2500MWh_CSP_'
 )
 print('TES = 2500 MWh with fixed prices')
-print(solution)"""
+print(solution)
 
-"""# TES = 1000000 MWh
+# TES = 1000000 MWh
 solved_optimization_problem = optimizer.build_and_solve_problem(
     ds_head_differences_time_array=head_differences_ds,
     TES_capacity_Wh=(-1000000*10**6),
@@ -134,3 +135,33 @@ solution = optimizer.get_solution_as_dataframe(
 )
 print('TES = 1000000 MWh with fixed prices')
 print(solution)"""
+
+# Very flexible scenario for comparison --------------------------------------------------------------------------------
+
+# TES = 1000000 MWh and CSP
+solved_optimization_problem = optimizer.build_and_solve_problem(
+    ds_head_differences_time_array=head_differences_ds,
+    TES_capacity_Wh=(-1000000*10**6),
+    distributed_secondary_pumping=False
+)
+solution = optimizer.get_solution_as_dataframe(
+    solved_optimization_problem,
+    save=True,
+    index_for_saving='TESTCASE_HighFlex_BuildT=flex21-25_TES=1000000MWh_CSP_'
+)
+print('TES = 1000000 MWh with variable prices CSP')
+print(solution)
+
+# TES = 1000000 MWh and DSP
+solved_optimization_problem = optimizer.build_and_solve_problem(
+    ds_head_differences_time_array=head_differences_ds,
+    TES_capacity_Wh=(-1000000*10**6),
+    distributed_secondary_pumping=True
+)
+solution = optimizer.get_solution_as_dataframe(
+    solved_optimization_problem,
+    save=True,
+    index_for_saving='TESTCASE_HighFlex_BuildT=flex21-25_TES=1000000MWh_DSP_'
+)
+print('TES = 1000000 MWh with variable prices DSP')
+print(solution)

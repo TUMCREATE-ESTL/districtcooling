@@ -9,7 +9,8 @@ import numpy as np
 class CoolingGrid:
     """
     Simulation-tool for the distribution system, including distribution piping system (DPS) and energy transfer
-    stations (ETS)
+    stations (ETS). Includes non-linear equations that are not used in class optimizer. Allows the calculation of line-
+    flow, head-losses and nodal-head distribution at a given set of nodal water consumptions.
     """
 
     # INITIALIZATION ===================================================================================================

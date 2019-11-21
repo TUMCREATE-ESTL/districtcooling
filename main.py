@@ -1,5 +1,4 @@
 import numpy as np
-
 import cobmo.building
 import cobmo.database_interface
 import districtcooling as dc

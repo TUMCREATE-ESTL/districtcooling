@@ -7,7 +7,7 @@ import pandas as pd
 
 class CoolingPlant:
     """
-    Defines the model of the District Cooling Plant
+    Defines the model of the District Cooling Plant. All linear correlations.
     """
     # INITIALIZATION ===================================================================================================
 
