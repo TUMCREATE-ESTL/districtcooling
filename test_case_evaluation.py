@@ -65,6 +65,10 @@ TC_flex_2500MWh_constant_price = pd.read_csv(
     'results/csv_files/TESTCASE_Price=const110.5_BuildT=flex21-25_TES=2500MWh_CSP__solved_problem.csv',
     index_col=[0]
 )
+TC_flex_10e6MWh_constant_price = pd.read_csv(
+    'results/csv_files/TESTCASE_Price=const110.5_BuildT=flex21-25_TES=1000000MWh_CSP__solved_problem.csv',
+    index_col=[0]
+)
 
 # Evaluation ===========================================================================================================
 
@@ -174,64 +178,65 @@ plt.show()"""
 """print(TC_flex_2500MWh.loc['DCS total Power in [MW]'])
 print(TC_flex_2500MWh.loc['DCS total Power in [MW]'].drop(['IDs'], axis=0).values)
 price_power_2500MWh = plt.scatter(
-    x=TC_flex_2500MWh.loc['DCS total Power in [MW]'].drop(['IDs'], axis=0).values,
-    y=parameters.environment['Price [S$/MWh]'].values,
+    x=parameters.environment['Price [S$/MWh]'].values,
+    y=TC_flex_2500MWh.loc['DCS total Power in [MW]'].drop(['IDs'], axis=0).values,
     marker='.',
     s=1,
     # c='darkgreen'
 )
 # label axis
-plt.xlabel('DCS total power (MW)')
-plt.ylabel('Electricity price (S$ per MWh)')
+plt.xlabel('Electricity price (S$ per MWh)')
+plt.ylabel('DCS total power (MW)')
 plt.title('TES = 2500 MWh, buildings=flex')
 plt.show()
 
 print(TC_fixed25_0MWh.loc['DCS total Power in [MW]'])
 print(TC_fixed25_0MWh.loc['DCS total Power in [MW]'].drop(['IDs'], axis=0).values)
 price_power_fixed_0MWh = plt.scatter(
-    x=TC_fixed25_0MWh.loc['DCS total Power in [MW]'].drop(['IDs'], axis=0).values,
-    y=parameters.environment['Price [S$/MWh]'].values,
+    x=parameters.environment['Price [S$/MWh]'].values,
+    y=TC_fixed25_0MWh.loc['DCS total Power in [MW]'].drop(['IDs'], axis=0).values,
     marker='.',
     s=1
 )
 # label axis
-plt.xlabel('DCS total power (MW)')
-plt.ylabel('Electricity price (S$ per MWh)')
+plt.xlabel('Electricity price (S$ per MWh)')
+plt.ylabel('DCS total power (MW)')
 plt.title('TES = 0 MWh, buildings=inflex')
 plt.show()"""
 
 # Wet-bulb to Power ----------------------------------------------------------------------------------------------------
-
-"""wb_power_fixed_0MWh = plt.scatter(
-    x=TC_fixed25_0MWh.loc['DCS total Power in [MW]'].drop(['IDs'], axis=0).values,
-    y=parameters.environment['Air wet-bulb temperature [°C]'].values,
+"""
+wb_power_fixed_0MWh = plt.scatter(
+    x=parameters.environment['Air wet-bulb temperature [°C]'].values,
+    y=TC_fixed25_0MWh.loc['DCS total Power in [MW]'].drop(['IDs'], axis=0).values,
     marker='.',
     s=1,
     # c='darkgreen'
 )
 # label axis
-plt.xlabel('DCS total power (MW)')
-plt.ylabel('Air wet-bulb temperature (°C)')
-plt.title('TES = 0 MWh, buildings = inflex, prices = WEP')
+plt.xlabel('Air wet-bulb temperature (°C)')
+plt.ylabel('DCS total power (MW)')
+plt.title('TES = 0 MWh, buildings = inflex')
 plt.show()
 
 wb_power_2500MWh_flex_constant_price = plt.scatter(
-    x=TC_flex_2500MWh_constant_price.loc['DCS total Power in [MW]'].drop(['IDs'], axis=0).values,
-    y=parameters.environment['Air wet-bulb temperature [°C]'].values,
+    x=parameters.environment['Air wet-bulb temperature [°C]'].values,
+    y=TC_flex_2500MWh_constant_price.loc['DCS total Power in [MW]'].drop(['IDs'], axis=0).values,
     marker='.',
     s=1
 )
 # label axis
-plt.xlabel('DCS total power (MW)')
-plt.ylabel('Air wet-bulb temperature (°C)')
-plt.title('TES=2500 MWh, buildings=flex, prices=110.5')
-plt.show()"""
-
+plt.xlabel('Air wet-bulb temperature (°C)')
+plt.ylabel('DCS total power (MW)')
+plt.title('TES=2500 MWh, buildings=flex')
+plt.show()
+"""
 # Histogram Power ------------------------------------------------------------------------------------------------------
 
 """histo_power_2500MWh = TC_flex_2500MWh.loc['DCS total Power in [MW]'].drop(['IDs'], axis=0).plot.hist(
     bins=100,
-    alpha=1
+    alpha=1,
+    ylim=[0, 3000]
 )
 # label axis
 plt.xlabel('DCS total power (MW)')
@@ -241,7 +246,8 @@ plt.show()
 
 histo_power_0MWh = TC_fixed25_0MWh.loc['DCS total Power in [MW]'].drop(['IDs'], axis=0).plot.hist(
     bins=100,
-    alpha=1
+    alpha=1,
+    ylim=[0, 3000]
 )
 # label axis
 plt.xlabel('DCS total power (MW)')
@@ -401,54 +407,54 @@ plt.show()
 """
 # Scatter ChS and TES flow vs price ------------------------------------------------------------------------------------
 
-"""chs_2500MWh = plt.scatter(
-    x=TC_flex_2500MWh.loc['Chiller-set flow [qbm/s]'].drop(['IDs'], axis=0).values,
-    y=parameters.environment['Price [S$/MWh]'].values,
+chs_2500MWh = plt.scatter(
+    y=TC_flex_2500MWh.loc['Chiller-set flow [qbm/s]'].drop(['IDs'], axis=0).values,
+    x=parameters.environment['Price [S$/MWh]'].values,
     marker='.',
     s=1,
     # c='r'
 )
 # label axis
-plt.xlabel('Chiller set flow [m$^3$/s]')
-plt.ylabel('Price [S$/MWh]')
+plt.ylabel('Chiller set flow [m$^3$/s]')
+plt.xlabel('Price [S$/MWh]')
 plt.title('TES = 2500 MWh, buildings = flex')
 plt.show()
 
 tes_2500MWh = plt.scatter(
-    x=TC_flex_2500MWh.loc['TES flow [qbm/s]'].drop(['IDs'], axis=0).values,
-    y=parameters.environment['Price [S$/MWh]'].values,
+    y=TC_flex_2500MWh.loc['TES flow [qbm/s]'].drop(['IDs'], axis=0).values,
+    x=parameters.environment['Price [S$/MWh]'].values,
     marker='.',
     s=1,
     # c='r'
 )
 # label axis
-plt.xlabel('TES flow [m$^3$/s]')
-plt.ylabel('Price [S$/MWh]')
+plt.ylabel('TES flow [m$^3$/s]')
+plt.xlabel('Price [S$/MWh]')
 plt.title('TES = 2500 MWh, buildings = flex')
 plt.show()
 
 chs_0MWh = plt.scatter(
-    x=TC_fixed25_0MWh.loc['Chiller-set flow [qbm/s]'].drop(['IDs'], axis=0).values,
-    y=parameters.environment['Price [S$/MWh]'].values,
+    y=TC_fixed25_0MWh.loc['Chiller-set flow [qbm/s]'].drop(['IDs'], axis=0).values,
+    x=parameters.environment['Price [S$/MWh]'].values,
     marker='.',
     s=1,
     # c='r'
 )
 # label axis
-plt.xlabel('Chiller set flow [m$^3$/s]')
-plt.ylabel('Price [S$/MWh]')
+plt.ylabel('Chiller set flow [m$^3$/s]')
+plt.xlabel('Price [S$/MWh]')
 plt.title('TES = 0 MWh, buildings = inflex')
 plt.show()
 
 tes_0MWh = plt.scatter(
-    x=TC_fixed25_0MWh.loc['TES flow [qbm/s]'].drop(['IDs'], axis=0).values,
-    y=parameters.environment['Price [S$/MWh]'].values,
+    y=TC_fixed25_0MWh.loc['TES flow [qbm/s]'].drop(['IDs'], axis=0).values,
+    x=parameters.environment['Price [S$/MWh]'].values,
     marker='.',
     s=1,
     # c='r'
 )
 # label axis
-plt.xlabel('TES flow [m$^3$/s]')
-plt.ylabel('Price [S$/MWh]')
+plt.ylabel('TES flow [m$^3$/s]')
+plt.xlabel('Price [S$/MWh]')
 plt.title('TES = 0 MWh, buildings = inflex')
-plt.show()"""
+plt.show()
