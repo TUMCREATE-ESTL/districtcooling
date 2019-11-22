@@ -1,5 +1,8 @@
 # District Cooling System Model and Optimal Scheduling
 
+- Author: Mischa Grussmann
+- Contributor: Sebastian Troitzsch
+
 ## Installation
 
 1. Check requirements:
