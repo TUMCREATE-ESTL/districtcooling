@@ -3,8 +3,8 @@
 ## Installation
 
 1. Check requirements:
-    - Anaconda Python 3.6
-    - [Gurobi Optimizer](http://www.gurobi.com/)
+    - [Anaconda](https://www.anaconda.com/distribution) Python 3.6 environment
+    - [Gurobi Optimizer](http://www.gurobi.com/) (tested with version 8.0.1)
 2. Clone or download repository.
 3. In your Python environment, run:
     1. `conda install geopandas`
@@ -13,13 +13,16 @@
 
 ## Getting started
 
-test_case_simulation.py: to initiate the optimization of different 
-test case scenarios and save the results.
+The repository includes the following modules and data directories:
 
-test_case_evaluation.py: to generate plots from the obtained optimization results.
+- `districtcooling`: District cooling system model and optimal scheduling module.
+- `cobmo`: Control-oriented building model module.
+- `data`: Test case input data specification.
+- `results`: All generated results will be stored here.
 
-main.py: exemplary code showing different functionality.
+The following run scripts are included in the root directory:
 
-## Author
-
-Mischa Grussmann
+- `test_case_simulation.py`: Initiate the optimization of different test case scenarios and save the results.
+- `test_case_evaluation.py`: Generate plots from the obtained optimization results.
+- `main.py`: Example script, demonstrating various functionality of the repository.
+- `preprocess_grid_data.py`: Generate the district cooling system data (`nodes.csv`, `lines.csv` `buildings.csv`) from a [CEA test case](https://github.com/architecture-building-systems/CityEnergyAnalyst/tree/v2.25/cea/examples).
