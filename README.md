@@ -1,5 +1,7 @@
 # District Cooling System Model and Optimal Scheduling
 
+[![DOI](https://zenodo.org/badge/218257415.svg)](https://zenodo.org/badge/latestdoi/218257415)
+
 - Author: Mischa Grussmann
 - Contributor: Sebastian Troitzsch
 
