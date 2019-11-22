@@ -1,16 +1,18 @@
 """Installation script."""
 
-from setuptools import setup, find_packages
+import setuptools
 
-setup(
+setuptools.setup(
     name='districtcooling',
-    version='0.1',
-    py_modules=find_packages(),
+    version='0.1.0',
+    py_modules=setuptools.find_packages(),
     install_requires=[
         'geopandas',
         'matplotlib',
         'networkx',
         'numpy',
         'pandas',
-        'pyomo'
+        'pyomo',
+        'shapely',
+        'utm'
     ])
